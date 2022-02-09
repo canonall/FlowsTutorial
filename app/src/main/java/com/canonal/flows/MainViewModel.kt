@@ -3,8 +3,9 @@ package com.canonal.flows
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
@@ -20,30 +21,33 @@ class MainViewModel : ViewModel() {
         }
     }
 
-
     init {
         collectCountDownFlow()
     }
 
     private fun collectCountDownFlow() {
-        val flow1 = flow {
-            emit(1)
+        val flow = flow {
+            delay(250L)
+            emit("Appetizer")
             delay(1000L)
-            emit(5)
+            emit("Main dish")
+            delay(100L)
+            emit("Dessert")
         }
         viewModelScope.launch {
-            //flatMapConcat returns flow
-            //first emit of flow1 comes and its value is used in second flow
-            //flatMapMerge and flatMapLatest also exist
-            flow1.flatMapConcat { value ->
-                flow {
-                    emit(value + 10)
-                    delay(1000L)
-                    emit(value + 11)
-                }
-            }.collect { value ->
-                println("The value is $value")
+            flow.onEach { food ->
+                println("FLOW: $food is delivered")
+
             }
+                //makes sure that below coroutine runs on a different coroutine
+                //than upper one. Initial flow will go on even though collector hasn't
+                //finished yet --> Main food delivered before finishing appetizer
+                .buffer()
+                .collect { food ->
+                    println("FLOW: Now eating $food")
+                    delay(1500L)
+                    println("FLOW: Finished eating $food")
+                }
         }
     }
 
