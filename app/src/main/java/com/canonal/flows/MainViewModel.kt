@@ -3,9 +3,12 @@ package com.canonal.flows
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlin.math.sqrt
 
 class MainViewModel : ViewModel() {
 
@@ -27,9 +30,32 @@ class MainViewModel : ViewModel() {
     //instead of UI, you can also observe it in ViewModel
     private fun collectCountDownFlow() {
         viewModelScope.launch {
-            countDownFlow.collect { currentValue ->
-                println("Current time $currentValue")
-            }
+            countDownFlow
+                //filter returns a flow
+                .filter { currentValue ->
+                    //if expression is true we continue and collect it
+                    //else we throw it away
+                    //take only even numbers
+                    currentValue % 2 == 0
+                }
+                //map filtered value to new value
+                //(you can change the order- first map then filter)
+                .map { currentValue ->
+                    //take the square of currentValue and map it to currentValue
+                    currentValue * currentValue
+                }
+                //you can do something on each value
+                .onEach { currentValue ->
+                    val root = sqrt(currentValue.toDouble())
+                    println("Current time onEach: $root")
+                //it can also be used as below outside of viewModelScope
+//                    countDownFlow.onEach {
+//                        print(it)
+//                    }.launchIn(viewModelScope)
+                }
+                .collect { currentValue ->
+                    println("Current time $currentValue")
+                }
         }
 //        viewModelScope.launch {
 //            countDownFlow.collectLatest { currentValue ->
