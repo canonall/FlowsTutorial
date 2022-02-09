@@ -3,7 +3,7 @@ package com.canonal.flows
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -39,10 +39,9 @@ class MainViewModel : ViewModel() {
                 println("FLOW: $food is delivered")
 
             }
-                //makes sure that below coroutine runs on a different coroutine
-                //than upper one. Initial flow will go on even though collector hasn't
-                //finished yet --> Main food delivered before finishing appetizer
-                .buffer()
+                //https://www.youtube.com/watch?v=sk3svS_fzZM
+                //explains at 23.10, a bit complicated
+                .conflate()
                 .collect { food ->
                     println("FLOW: Now eating $food")
                     delay(1500L)
