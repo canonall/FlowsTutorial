@@ -2,6 +2,7 @@ package com.canonal.flows
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Lifecycle.State.STARTED
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -51,6 +52,20 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(STARTED) {
                 flow.collectLatest(collect)
+            }
+        }
+    }
+
+    //extension function for observing StateFlow as lifecycle aware
+    //use fragment for fragment. Since it is suitable for one time events,
+    //it is meaning ful to use collect instead of collectLatest
+    private fun <T> AppCompatActivity.collectSharedFlowAsLifeCycleAware(
+        flow: Flow<T>,
+        collect: (T) -> Unit
+    ) {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                flow.collect(collect)
             }
         }
     }
