@@ -3,9 +3,7 @@ package com.canonal.flows
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.conflate
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
@@ -21,8 +19,16 @@ class MainViewModel : ViewModel() {
         }
     }
 
+    private val _stateFlow = MutableStateFlow(0)
+    val stateFlow: StateFlow<Int>
+        get() = _stateFlow
+
     init {
         collectCountDownFlow()
+    }
+
+    fun incrementCounter() {
+        _stateFlow.value += 1
     }
 
     private fun collectCountDownFlow() {
@@ -39,10 +45,7 @@ class MainViewModel : ViewModel() {
                 println("FLOW: $food is delivered")
 
             }
-                //https://www.youtube.com/watch?v=sk3svS_fzZM
-                //explains at 23.10, a bit complicated
-                .conflate()
-                .collect { food ->
+                .collectLatest { food ->
                     println("FLOW: Now eating $food")
                     delay(1500L)
                     println("FLOW: Finished eating $food")
