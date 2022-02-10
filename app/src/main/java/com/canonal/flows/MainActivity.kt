@@ -25,13 +25,13 @@ class MainActivity : AppCompatActivity() {
         mainViewModel = ViewModelProvider(this)[MainViewModel::class.java]
 
         binding.btn.setOnClickListener {
-            mainViewModel.incrementCounter()
+           // mainViewModel.incrementCounter()
         }
 
         //you can use flow operators here as an advantage over livedata
-        collectLatestLifecycleFlow(mainViewModel.stateFlow) { value ->
-            binding.tvTimer.text = value.toString()
-        }
+//        collectLatestLifecycleFlow(mainViewModel.stateFlow) { value ->
+//            binding.tvTimer.text = value.toString()
+//        }
 
 
 //        lifecycleScope.launch {
